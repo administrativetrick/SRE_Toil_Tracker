@@ -253,6 +253,40 @@ def update_total_toil():
         total_toil = total_toil / 86400
     total_toil_label.config(text=f"Total Toil: {total_toil:.2f} {duration_unit}")
 
+
+def search_items(event=None):  # default parameter for keyboard binding
+    # Clear the treeview
+    for i in treeview.get_children():
+        treeview.delete(i)
+
+    # Get the search term
+    search_term = search_entry.get()
+
+    # Query the database for the search term
+    cursor = conn.execute("SELECT * FROM toil_items WHERE description LIKE ?", ('%' + search_term + '%',))
+
+    # Populate the treeview with the search results
+    for row in cursor:
+        treeview.insert('', 'end', values=row)
+
+
+# ...
+
+# Search bar
+search_frame = Frame(root, bd=2, padx=15, pady=10, bg=color_scheme["bg"])
+search_frame.pack(padx=15, pady=15)
+search_label = Label(search_frame, text="Search:", bg=color_scheme["bg"], fg=color_scheme["fg"])
+search_label.grid(row=0, column=0, sticky='e')
+search_entry = Entry(search_frame, bg=color_scheme["fieldbg"], fg=color_scheme["fg"],
+                     insertbackground=color_scheme["fg"])
+search_entry.grid(row=0, column=1, sticky='we')
+search_button = Button(search_frame, text="Search", command=search_items, bg=color_scheme["bg"], fg=color_scheme["fg"],
+                       activebackground=color_scheme["selectbg"], activeforeground=color_scheme["selectfg"])
+search_button.grid(row=0, column=2, sticky='we')
+
+# Bind the search function to the 'Control + f' shortcut
+root.bind('<Control-f>', search_items)
+
 # Toil inputs frame
 inputs_frame = Frame(root, bd=2, padx=15, pady=10, bg=color_scheme["bg"])
 inputs_frame.pack(padx=15, pady=15)
