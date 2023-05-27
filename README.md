@@ -31,6 +31,9 @@ There is an experimental Dark Mode, but it is not currently working correctly to
 
 ## Changelog
 
+## V 1.0.1
+* Added a search feature
+
 ## V 1.0
 * User-Friendly Interface: The application is built with tkinter, a Python GUI library, resulting in a simple and intuitive interface that's easy to use for tracking and managing tasks.
 * Task Addition: You can easily add new toil tasks, providing details such as task name, category, start and end times, and any relevant notes.
