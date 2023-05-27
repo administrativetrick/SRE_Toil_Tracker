@@ -14,8 +14,8 @@ Clone this repository to your local machine.
 Navigate to the project directory.
 Run these commands:
 
-  bash
-  python toil_tracker.py
+    bash
+    python toil_tracker.py
   
 ### How to Use
 To add a task record, fill in the form at the top of the application window and click 'Add Toil'.
