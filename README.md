@@ -40,6 +40,7 @@ There is an experimental Dark Mode, but it is not currently working correctly to
 * Multitask Deletion: The application supports the deletion of multiple tasks at once. This feature enhances usability and saves time for users managing large amounts of toil.
 * Clean and Organized Display: Tasks are neatly displayed in a tabular format, making it easy to view and manage all your toil in one place.
 * Notification Messages: The application provides helpful feedback messages upon completion of various operations such as task deletion or modification. This ensures users are kept informed about their actions.
+* CSV Export: A feature exists to export your tasks to a CSV file for later use.
 
 ## License
 This project is licensed under the MIT License - see the LICENSE file for details.
