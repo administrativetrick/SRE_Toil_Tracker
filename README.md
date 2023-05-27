@@ -1,5 +1,5 @@
 # Overview
-SRE Toil Tracker is a Python-based GUI application designed to track and manage laborious tasks, often referred to as 'toil'. This term is typically used to describe manual work that doesn't offer enduring value but is necessary nonetheless. The application provides an easy-to-use interface for creating, updating, and deleting task records, ensuring every necessary but mundane task is well-managed.
+SRE Toil Tracker is a Python-based GUI application designed to track and manage laborious tasks, often referred to as 'toil'. This term is typically used to describe manual work that doesn't offer enduring value but is necessary nonetheless. The application provides an easy-to-use interface for creating, updating, and deleting task records, ensuring every necessary but mundane task is well-managed. This is not a replacement for Sprint Ceremonies, but rather an easy way for Engineers to track toil until they have time to create user stories and acceptance criteria for specific toil items.
 
 ## Key Features
 Create Records: Allows you to add new task records with associated details such as task description, task duration, and any pertinent comments.
