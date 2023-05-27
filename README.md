@@ -29,6 +29,18 @@ The goal is to further enhance this tool by incorporating features such as multi
 ### Experiment Features
 There is an experimental Dark Mode, but it is not currently working correctly to access that press File -> 'Toggle Theme'. Most things appear fine in Dark Mode with the exception of the Tree View.
 
+## Changelog
+
+## V 1.0
+* User-Friendly Interface: The application is built with tkinter, a Python GUI library, resulting in a simple and intuitive interface that's easy to use for tracking and managing tasks.
+* Task Addition: You can easily add new toil tasks, providing details such as task name, category, start and end times, and any relevant notes.
+* Task Modification: Any toil task in the application can be modified. Simply double-click on a task in the table and the input fields will be auto-filled with the task details, which you can then modify as needed.
+* Task Deletion: Single or multiple tasks can be removed easily from the task list. The right-click context menu allows for quick removal of selected tasks.
+* Data Persistence: The application utilizes SQLite3 for data persistence. This means that any task added, modified, or deleted in the application is immediately reflected in the database. You don't need to worry about losing your tasks when the application is closed.
+* Multitask Deletion: The application supports the deletion of multiple tasks at once. This feature enhances usability and saves time for users managing large amounts of toil.
+* Clean and Organized Display: Tasks are neatly displayed in a tabular format, making it easy to view and manage all your toil in one place.
+* Notification Messages: The application provides helpful feedback messages upon completion of various operations such as task deletion or modification. This ensures users are kept informed about their actions.
+
 ## License
 This project is licensed under the MIT License - see the LICENSE file for details.
 
