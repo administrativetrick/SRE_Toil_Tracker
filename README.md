@@ -32,6 +32,9 @@ There is an experimental Dark Mode, but it is not currently working correctly to
 ## Changelog
 
 ## V 1.0.1
+* Added a time conversion utility that is accesible from the top Menu Bar
+
+## V 1.0.1
 * Added a search feature
 
 ## V 1.0
