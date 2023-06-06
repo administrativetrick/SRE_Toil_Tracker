@@ -32,10 +32,12 @@ There is an experimental Dark Mode, but it is not currently working correctly to
 ## Changelog
 
 ## V 1.0.3
-* Experimental Feature added, this feature adds a field showing Money saved by the Eliminated toil. This assumed a default of $80,000
+* Experimental Feature added, this feature adds a field showing Money saved by the Eliminated toil. This assumes a default salary of $80,000
+  * This feature is an approximate and is not exact. It assumes a 5-day 8 hour per day work week with no holidays.
+* New feature also shows potential money saved based off toil identified that has not yet been eliminated
 * Money saved field is updated every 1 second
 * Added additional module to show how much in non-eliminated toil is available, this can be used in future releases
-* Preferences Field added to allow for the future configuration of Average Engineers Salary
+* Preferences Field added to allow for the future configuration of Average Engineers Salary (Not yet functioning, need to add global variable or some other mechanism to share this configuration)
 
 ## V 1.0.2
 * Added a time conversion utility that is accesible from the top Menu Bar
