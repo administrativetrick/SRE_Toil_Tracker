@@ -36,6 +36,7 @@ There is an experimental Dark Mode, but it is not currently working correctly to
 * Added a column for Eliminated, this allows to you track past Toil and identify if that toil has been elimiated or not
 * Removed the first column in the treeview
 * Adjusted the root window to be slightly wider to accomodate eliminated column
+* Changed the default selection in the Time Conversion Tool to minutes
 
 ## V 1.0.1
 * Added a search feature
