@@ -129,6 +129,7 @@ def openConversionToolWindow():
     conversion_win.title('Time Convertsion Tool')
 
     unit_selector = ttk.Combobox(conversion_win, values=['Years', 'Months', 'Days', 'Hours', 'Minutes'])
+    unit_selector.set("Minutes")
     unit_selector.grid(column=0, row=0)
 
     value_entry = ttk.Entry(conversion_win)
