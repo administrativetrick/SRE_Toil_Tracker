@@ -102,6 +102,24 @@ def export_to_csv():
         writer.writerows(list_toil_items())
     messagebox.showinfo("Success", "Data exported successfully!")
 
+def calculate_money_saved(salary):
+    total_seconds = get_total_toil()
+    total_hours = total_seconds / 3600
+    salary_per_hour = salary / (52 * 40)  # Assuming 52 weeks in a year and 40 hours a week
+    money_saved = total_hours * salary_per_hour
+    return money_saved
+
+def calculate_money_pending(salary):
+    total_seconds = get_total_toil()
+    total_hours = total_seconds / 3600
+    cursor = conn.execute("SELECT SUM(duration) FROM toil_items WHERE eliminated = 0")
+    total_duration_pending = cursor.fetchone()[0]
+    if total_duration_pending is None:
+        total_duration_pending = 0
+    total_hours_pending = total_duration_pending / 3600
+    salary_per_hour = salary / (52 * 40)  # Assuming 52 weeks in a year and 40 hours a week
+    money_pending = total_hours_pending * salary_per_hour
+    return money_pending
 
 def openConversionToolWindow():
     # Top Level Object to be treated as a new Window
@@ -144,6 +162,26 @@ def openConversionToolWindow():
     result_label = ttk.Label(conversion_win, text="")
     result_label.grid(column=0, row=1, columnspan=4)
 
+def open_preferences_window():
+    def save_preferences():
+        try:
+            salary = float(salary_entry.get())
+            messagebox.showinfo("Success", f"Average Engineer's Salary set to ${salary}")
+            pref_win.destroy()
+        except ValueError:
+            messagebox.showerror("Error", "Salary must be a number.")
+
+    pref_win = Toplevel(root)
+    pref_win.title('Preferences')
+
+    salary_label = ttk.Label(pref_win, text="Average Engineer's Salary:")
+    salary_label.grid(column=0, row=0)
+
+    salary_entry = ttk.Entry(pref_win)
+    salary_entry.grid(column=1, row=0)
+
+    save_button = ttk.Button(pref_win, text="Save", command=save_preferences)
+    save_button.grid(column=2, row=0)
 
 # Define the color scheme for the dark mode
 dark_color_scheme = {
@@ -240,6 +278,7 @@ file_menu = Menu(menubar, tearoff=0)
 file_menu.add_command(label="Export to CSV", command=export_to_csv)
 file_menu.add_command(label="Toggle Theme", command=toggle_theme)
 file_menu.add_command(label="Exit", command=root.quit)
+file_menu.add_command(label="Preferences", command=open_preferences_window)
 menubar.add_cascade(label="File", menu=file_menu)
 tools_menu = Menu(menubar, tearoff=0)
 tools_menu.add_command(label="Time Conversion", command=openConversionToolWindow)
@@ -342,8 +381,21 @@ def search_items(event=None):  # default parameter for keyboard binding
     for row in cursor:
         treeview.insert('', 'end', values=row)
 
+average_engineer_salary = 80000  # Default salary. It will be updated in the Preferences window.
 
-# ...
+# Function to update the money saved label
+def update_money_saved_label():
+    money_saved = calculate_money_saved(average_engineer_salary)
+    money_saved_label.config(text=f'Money Saved: ${money_saved:.2f}')
+    # Call this function again after 1000 ms (1 second)
+    root.after(1000, update_money_saved_label)
+
+# Create label for displaying money saved with larger, bold font
+money_saved_label = Label(root, fg='green', bg=color_scheme["bg"], font=('Arial', 14, 'bold'))
+money_saved_label.place(relx=1, y=0, anchor='ne')
+
+# Update the label with the current value every second
+update_money_saved_label()
 
 # Search bar
 search_frame = Frame(root, bd=2, padx=15, pady=10, bg=color_scheme["bg"])
