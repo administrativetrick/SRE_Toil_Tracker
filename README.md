@@ -33,6 +33,9 @@ There is an experimental Dark Mode, but it is not currently working correctly to
 
 ## V 1.0.2
 * Added a time conversion utility that is accesible from the top Menu Bar
+* Added a column for Eliminated, this allows to you track past Toil and identify if that toil has been elimiated or not
+* Removed the first column in the treeview
+* Adjusted the root window to be slightly wider to accomodate eliminated column
 
 ## V 1.0.1
 * Added a search feature
