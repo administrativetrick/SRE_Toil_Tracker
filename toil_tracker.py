@@ -102,24 +102,30 @@ def export_to_csv():
         writer.writerows(list_toil_items())
     messagebox.showinfo("Success", "Data exported successfully!")
 
-def calculate_money_saved(salary):
-    total_seconds = get_total_toil()
-    total_hours = total_seconds / 3600
-    salary_per_hour = salary / (52 * 40)  # Assuming 52 weeks in a year and 40 hours a week
-    money_saved = total_hours * salary_per_hour
-    return money_saved
 
-def calculate_money_pending(salary):
-    total_seconds = get_total_toil()
-    total_hours = total_seconds / 3600
-    cursor = conn.execute("SELECT SUM(duration) FROM toil_items WHERE eliminated = 0")
-    total_duration_pending = cursor.fetchone()[0]
+def calculate_money_saved_and_pending(salary):
+    # Assuming 52 weeks in a year and 40 hours a week for the salary
+    salary_per_hour = salary / (52 * 40)
+
+    # Calculate money saved
+    cursor_saved = conn.execute("SELECT SUM(duration) FROM toil_items WHERE eliminated = 1")
+    total_duration_saved = cursor_saved.fetchone()[0]
+    if total_duration_saved is None:
+        total_duration_saved = 0
+    total_days_saved = total_duration_saved / (24 * 3600)  # convert duration from seconds to 24-hour days
+    total_workdays_saved = total_days_saved * (5 / 7)  # convert total days to workdays, assuming 5 workdays out of 7
+    money_saved = total_workdays_saved * salary_per_hour * 8  # multiply by 8 hours to get the daily rate
+
+    # Calculate money pending
+    cursor_pending = conn.execute("SELECT SUM(duration) FROM toil_items WHERE eliminated = 0")
+    total_duration_pending = cursor_pending.fetchone()[0]
     if total_duration_pending is None:
         total_duration_pending = 0
-    total_hours_pending = total_duration_pending / 3600
-    salary_per_hour = salary / (52 * 40)  # Assuming 52 weeks in a year and 40 hours a week
-    money_pending = total_hours_pending * salary_per_hour
-    return money_pending
+    total_days_pending = total_duration_pending / (24 * 3600)  # convert duration from seconds to 24-hour days
+    total_workdays_pending = total_days_pending * (5 / 7)  # convert total days to workdays, assuming 5 workdays out of 7
+    money_pending = total_workdays_pending * salary_per_hour * 8  # multiply by 8 hours to get the daily rate
+
+    return money_saved, money_pending
 
 def openConversionToolWindow():
     # Top Level Object to be treated as a new Window
@@ -384,18 +390,23 @@ def search_items(event=None):  # default parameter for keyboard binding
 average_engineer_salary = 80000  # Default salary. It will be updated in the Preferences window.
 
 # Function to update the money saved label
-def update_money_saved_label():
-    money_saved = calculate_money_saved(average_engineer_salary)
+def update_money_labels():
+    money_saved, money_pending = calculate_money_saved_and_pending(average_engineer_salary)
     money_saved_label.config(text=f'Money Saved: ${money_saved:.2f}')
+    money_pending_label.config(text=f'Potential Savings: ${money_pending:.2f}')
+
     # Call this function again after 1000 ms (1 second)
-    root.after(1000, update_money_saved_label)
+    root.after(1000, update_money_labels)
 
 # Create label for displaying money saved with larger, bold font
 money_saved_label = Label(root, fg='green', bg=color_scheme["bg"], font=('Arial', 14, 'bold'))
 money_saved_label.place(relx=1, y=0, anchor='ne')
 
-# Update the label with the current value every second
-update_money_saved_label()
+# Create label for displaying potential savings with smaller, regular font
+money_pending_label = Label(root, fg='black', bg=color_scheme["bg"], font=('Arial', 12))
+money_pending_label.place(relx=1, y=30, anchor='ne')
+
+update_money_labels()
 
 # Search bar
 search_frame = Frame(root, bd=2, padx=15, pady=10, bg=color_scheme["bg"])
