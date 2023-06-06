@@ -13,7 +13,8 @@ conn.execute('''
     CREATE TABLE IF NOT EXISTS toil_items
     (id INTEGER PRIMARY KEY,
     description TEXT,
-    duration INTEGER);
+    duration INTEGER,
+    eliminated INTEGER DEFAULT 0);
 ''')
 
 
@@ -46,13 +47,14 @@ def show_context_menu(event):
         messagebox.showerror("Error", "No item selected!")
 
 
-def add_toil_item(description, duration):
+def add_toil_item(description, duration, eliminated):
     try:
         if not description:
             raise ValueError("Description cannot be empty.")
         if duration <= 0:
             raise ValueError("Duration must be positive.")
-        conn.execute("INSERT INTO toil_items (description, duration) VALUES (?, ?)", (description, duration))
+        conn.execute("INSERT INTO toil_items (description, duration, eliminated) VALUES (?, ?, ?)",
+                     (description, duration, eliminated))
         conn.commit()
         messagebox.showinfo("Success", "Toil added successfully!")
         # Clear input fields after successful addition
@@ -62,8 +64,9 @@ def add_toil_item(description, duration):
         messagebox.showerror("Error", str(e))
 
 
-def update_toil_item(id, description, duration):
-    conn.execute("UPDATE toil_items SET description = ?, duration = ? WHERE id = ?", (description, duration, id))
+def update_toil_item(id, description, duration, eliminated):
+    conn.execute("UPDATE toil_items SET description = ?, duration = ?, eliminated = ? WHERE id = ?",
+                 (description, duration, id, eliminated))
     conn.commit()
 
 
@@ -95,7 +98,7 @@ def export_to_csv():
     filename = filedialog.asksaveasfilename(defaultextension=".csv")
     with open(filename, "w", newline='') as file:
         writer = csv.writer(file)
-        writer.writerow(["ID", "Description", "Duration"])
+        writer.writerow(["ID", "Description", "Duration", "Eliminated"])
         writer.writerows(list_toil_items())
     messagebox.showinfo("Success", "Data exported successfully!")
 
@@ -166,7 +169,7 @@ color_scheme = light_color_scheme
 
 # Initialize tkinter root window
 root = Tk()
-root.geometry("800x600")
+root.geometry("850x600")
 root.title("Toil Tracker")
 
 # Configure root window background color
@@ -261,7 +264,7 @@ def add_button_click():
             toil_duration = toil_duration * 3600
         elif duration_unit == "Days":
             toil_duration = toil_duration * 86400
-        add_toil_item(toil_description_entry.get(), toil_duration)
+        add_toil_item(toil_description_entry.get(), toil_duration, int(toil_eliminated_var.get()))
         update_treeview()
         update_total_toil()
     except ValueError:
@@ -287,6 +290,7 @@ def edit_button_click():
         toil_description_entry.insert(0, selected_item_values[1])
         toil_duration_entry.delete(0, END)
         toil_duration_entry.insert(0, int(timedelta(seconds=int(selected_item_values[2])).total_seconds()))
+        toil_eliminated_var.set(int(selected_item_values[3]))
     except Exception as e:
         messagebox.showerror("Error", "No item selected!")
 
@@ -301,7 +305,8 @@ def save_button_click():
             toil_duration = toil_duration * 3600
         elif duration_unit == "Days":
             toil_duration = toil_duration * 86400
-        update_toil_item(int(toil_id_entry.get()), toil_description_entry.get(), toil_duration)
+        update_toil_item(int(toil_id_entry.get()), toil_description_entry.get(), toil_duration,
+                         toil_eliminated_var.get())
         update_treeview()
         update_total_toil()
         messagebox.showinfo("Success", "Toil updated successfully!")
@@ -408,13 +413,18 @@ save_button.grid(row=3, column=4, sticky='we')
 
 # Toil treeview
 treeview = ttk.Treeview(root)
-treeview["columns"] = ("id", "description", "duration")
+treeview.pack(fill='x')
+treeview['columns'] = ["id", "description", "duration", "eliminated"]
+treeview.column("#0", width=0, stretch=NO)  # Hide the first column (tree column)
+
 treeview.column("id", width=50)
-treeview.column("description", width=300)
-treeview.column("duration", width=200)
-treeview.heading("id", text="ID")
-treeview.heading("description", text="Description")
-treeview.heading("duration", text="Duration (s)")
+treeview.column('description', width=300)
+treeview.column('duration', width=200)
+treeview.column('eliminated', width=100)
+treeview.heading('id', text="ID")
+treeview.heading('description', text='Description')
+treeview.heading('duration', text='Duration (s)')
+treeview.heading('eliminated', text='Eliminated')
 treeview.pack(pady=20)
 
 # Total toil label
@@ -427,6 +437,14 @@ toil_total_duration_unit = ttk.Combobox(root, values=["Seconds", "Minutes", "Hou
 toil_total_duration_unit.set("Seconds")
 toil_total_duration_unit.pack(pady=10)
 toil_total_duration_unit.bind("<<ComboboxSelected>>", lambda _: update_total_toil())
+
+# Add a checkbox for 'eliminated'
+toil_eliminated_label = Label(inputs_frame, text="Eliminated:", bg=color_scheme["bg"], fg=color_scheme["fg"])
+toil_eliminated_label.grid(row=4, column=0, sticky='e')
+toil_eliminated_var = IntVar()
+toil_eliminated_checkbox = Checkbutton(inputs_frame, variable=toil_eliminated_var, onvalue=1, offvalue=0,
+                                       bg=color_scheme["bg"], fg=color_scheme["fg"])
+toil_eliminated_checkbox.grid(row=4, column=1, sticky='w')
 
 # Create a context menu
 context_menu = Menu(root, tearoff=0)
