@@ -31,6 +31,12 @@ There is an experimental Dark Mode, but it is not currently working correctly to
 
 ## Changelog
 
+## V 1.0.4
+* Added a stopwatch to the bottom of the application to allow users to track time taken from start to finish of tasks straight form the application.
+* Stopwatch timer is in seconds to allow users to track time easier.
+* Made Windows slightly longer from 600 to 650 to allow the stopwatch to show appropriately.
+* Stopwatch will also clear if the Stopwatch label is double-clicked.
+
 ## V 1.0.3
 * Experimental Feature added, this feature adds a field showing Money saved by the Eliminated toil. This assumes a default salary of $80,000
   * This feature is an approximate and is not exact. It assumes a 5-day 8 hour per day work week with no holidays.
