@@ -29,6 +29,9 @@ The goal is to further enhance this tool by incorporating features such as multi
 ### Experiment Features
 There is an experimental Dark Mode, but it is not currently working correctly to access that press File -> 'Toggle Theme'. Most things appear fine in Dark Mode with the exception of the Tree View.
 
+### Dependencies
+* The pyperclip module is a dependency for this application.
+
 ## Changelog
 
 ## V 1.0.4
