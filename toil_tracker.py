@@ -4,6 +4,7 @@ from datetime import timedelta
 from tkinter import *
 from tkinter import ttk, messagebox, filedialog
 import pyperclip
+from datetime import datetime
 
 # Connect to SQLite database (or create it if it doesn't exist)
 conn = sqlite3.connect('toil.db')
@@ -14,7 +15,9 @@ conn.execute('''
     (id INTEGER PRIMARY KEY,
     description TEXT,
     duration INTEGER,
-    eliminated INTEGER DEFAULT 0);
+    eliminated INTEGER DEFAULT 0,
+    date_identified TEXT,
+    saved_duration_unit TEXT);
 ''')
 
 class StopWatch:
@@ -93,19 +96,22 @@ def show_context_menu(event):
         messagebox.showerror("Error", "No item selected!")
 
 
-def add_toil_item(description, duration, eliminated):
+def add_toil_item(description, duration, eliminated, saved_duration_unit):
+    date_identified = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+
     try:
         if not description:
             raise ValueError("Description cannot be empty.")
         if duration <= 0:
             raise ValueError("Duration must be positive.")
-        conn.execute("INSERT INTO toil_items (description, duration, eliminated) VALUES (?, ?, ?)",
-                     (description, duration, eliminated))
+        conn.execute("INSERT INTO toil_items (description, duration, eliminated, date_identified, saved_duration_unit) VALUES (?, ?, ?, ?, ?)",
+                     (description, duration, eliminated, date_identified, saved_duration_unit))
         conn.commit()
         messagebox.showinfo("Success", "Toil added successfully!")
         # Clear input fields after successful addition
         toil_description_entry.delete(0, END)
         toil_duration_entry.delete(0, END)
+        toil_duration_unit.set("Seconds")  # Reset unit to default value
     except Exception as e:
         messagebox.showerror("Error", str(e))
 
@@ -149,29 +155,40 @@ def export_to_csv():
     messagebox.showinfo("Success", "Data exported successfully!")
 
 
-def calculate_money_saved_and_pending(salary):
+def calculate_money_saved_and_pending(salary, toil_duration_unit="days"):
     # Assuming 52 weeks in a year and 40 hours a week for the salary
     salary_per_hour = salary / (52 * 40)
 
     # Calculate money saved
     cursor_saved = conn.execute("SELECT SUM(duration) FROM toil_items WHERE eliminated = 1")
+    saved_duration = conn.execute("SELECT saved_duration_unit FROM toil_items")
     total_duration_saved = cursor_saved.fetchone()[0]
     if total_duration_saved is None:
         total_duration_saved = 0
-    total_days_saved = total_duration_saved / (24 * 3600)  # convert duration from seconds to 24-hour days
-    total_workdays_saved = total_days_saved * (5 / 7)  # convert total days to workdays, assuming 5 workdays out of 7
-    money_saved = total_workdays_saved * salary_per_hour * 8  # multiply by 8 hours to get the daily rate
+    # Determine whether to calculate in terms of 8-hour days or direct hours
+    if saved_duration == "Days":
+        total_days_saved = total_duration_saved / (8 * 3600)  # convert duration from seconds to 8-hour workdays
+        money_saved = total_days_saved * salary_per_hour * 8  # multiply by 8 hours to get the daily rate
+    else:
+        total_hours_saved = total_duration_saved / 3600  # convert duration from seconds to hours
+        money_saved = total_hours_saved * salary_per_hour  # directly calculate saved money
 
     # Calculate money pending
     cursor_pending = conn.execute("SELECT SUM(duration) FROM toil_items WHERE eliminated = 0")
+    saved_duration = conn.execute("SELECT saved_duration_unit FROM toil_items")
     total_duration_pending = cursor_pending.fetchone()[0]
     if total_duration_pending is None:
         total_duration_pending = 0
-    total_days_pending = total_duration_pending / (24 * 3600)  # convert duration from seconds to 24-hour days
-    total_workdays_pending = total_days_pending * (5 / 7)  # convert total days to workdays, assuming 5 workdays out of 7
-    money_pending = total_workdays_pending * salary_per_hour * 8  # multiply by 8 hours to get the daily rate
+    # Determine whether to calculate in terms of 8-hour days or direct hours
+    if saved_duration == "Days":
+        total_days_pending = total_duration_pending / (8 * 3600)  # convert duration from seconds to 8-hour workdays
+        money_pending = total_days_pending * salary_per_hour * 8  # multiply by 8 hours to get the daily rate
+    else:
+        total_hours_pending = total_duration_pending / 3600  # convert duration from seconds to hours
+        money_pending = total_hours_pending * salary_per_hour  # directly calculate pending money
 
     return money_saved, money_pending
+
 
 def openConversionToolWindow():
     # Top Level Object to be treated as a new Window
@@ -260,7 +277,7 @@ color_scheme = light_color_scheme
 
 # Initialize tkinter root window
 root = Tk()
-root.geometry("850x650")
+root.geometry("850x700")
 root.title("Toil Tracker")
 
 # Configure root window background color
@@ -342,21 +359,23 @@ root.config(menu=menubar)
 
 def update_treeview():
     treeview.delete(*treeview.get_children())
-    for i, item in enumerate(list_toil_items()):
+    items = list_toil_items()
+    if filter_eliminated_var.get():  # only include items that are not eliminated
+        items = [item for item in items if item[3] == 0]
+    for i, item in enumerate(items):
         treeview.insert('', 'end', values=item)
-
 
 def add_button_click():
     try:
         toil_duration = int(toil_duration_entry.get())
-        duration_unit = toil_duration_unit.get()
-        if duration_unit == "Minutes":
+        saved_duration_unit = toil_duration_unit.get()
+        if saved_duration_unit == "Minutes":
             toil_duration = toil_duration * 60
-        elif duration_unit == "Hours":
+        elif saved_duration_unit == "Hours":
             toil_duration = toil_duration * 3600
-        elif duration_unit == "Days":
+        elif saved_duration_unit == "Days":
             toil_duration = toil_duration * 86400
-        add_toil_item(toil_description_entry.get(), toil_duration, int(toil_eliminated_var.get()))
+        add_toil_item(toil_description_entry.get(), toil_duration, int(toil_eliminated_var.get()), saved_duration_unit)
         update_treeview()
         update_total_toil()
     except ValueError:
@@ -490,7 +509,7 @@ toil_duration_entry.grid(row=1, column=1, sticky='we')
 # Toil duration unit label and dropdown
 toil_duration_unit_label = Label(inputs_frame, text="Duration Unit:", bg=color_scheme["bg"], fg=color_scheme["fg"])
 toil_duration_unit_label.grid(row=1, column=2, padx=(10, 0), sticky='w')
-toil_duration_unit = ttk.Combobox(inputs_frame, values=["Seconds", "Minutes", "Hours", "Days"],
+toil_duration_unit = ttk.Combobox(inputs_frame, values=["Seconds", "Minutes", "Hours"],
                                   style="ComboboxStyle.TCombobox")
 toil_duration_unit.set("Seconds")
 toil_duration_unit.grid(row=1, column=3, sticky='we')
@@ -555,6 +574,15 @@ toil_eliminated_var = IntVar()
 toil_eliminated_checkbox = Checkbutton(inputs_frame, variable=toil_eliminated_var, onvalue=1, offvalue=0,
                                        bg=color_scheme["bg"], fg=color_scheme["fg"])
 toil_eliminated_checkbox.grid(row=4, column=1, sticky='w')
+
+# Add a checkbox for 'filter eliminated'
+filter_eliminated_label = Label(root, text="Filter Eliminated:", bg=color_scheme["bg"], fg=color_scheme["fg"])
+filter_eliminated_label.pack()
+filter_eliminated_var = IntVar()
+filter_eliminated_checkbox = Checkbutton(root, variable=filter_eliminated_var, onvalue=1, offvalue=0,
+                                         command=update_treeview,  # update treeview when checkbox is toggled
+                                         bg=color_scheme["bg"], fg=color_scheme["fg"])
+filter_eliminated_checkbox.pack()
 
 # Create a context menu
 context_menu = Menu(root, tearoff=0)
