@@ -17,6 +17,52 @@ conn.execute('''
     eliminated INTEGER DEFAULT 0);
 ''')
 
+class StopWatch:
+    def __init__(self, root):
+        self.root = root
+        self.running = False
+        self.time = 0
+
+        # Stopwatch display
+        self.stopwatch_label = Label(self.root, text="0 s", bg=color_scheme["bg"], fg=color_scheme["fg"])
+        self.stopwatch_label.pack()
+
+        # Frame to hold the buttons
+        self.button_frame = Frame(self.root, bg=color_scheme["bg"])
+        self.button_frame.pack()
+
+        # Stopwatch start/stop button
+        self.stopwatch_button = Button(self.button_frame, text="Start Stopwatch", command=self.toggle,
+                                       bg=color_scheme["bg"], fg=color_scheme["fg"],
+                                       activebackground=color_scheme["selectbg"], activeforeground=color_scheme["selectfg"])
+        self.stopwatch_button.pack(side=LEFT, padx=5)
+
+        # Stopwatch clear button
+        self.clear_button = Button(self.button_frame, text="Clear Stopwatch", command=self.clear,
+                                   bg=color_scheme["bg"], fg=color_scheme["fg"],
+                                   activebackground=color_scheme["selectbg"], activeforeground=color_scheme["selectfg"])
+        self.clear_button.pack(side=LEFT, padx=5)
+
+    def update(self):
+        if self.running:
+            self.time += 1
+            self.stopwatch_label.config(text=f"{self.time} s")
+            self.root.after(1000, self.update)  # Update every second
+
+    def toggle(self):
+        if self.running:
+            self.running = False
+            self.stopwatch_button.config(text="Start Stopwatch")
+        else:
+            self.running = True
+            self.stopwatch_button.config(text="Stop")
+            self.update()
+
+    def clear(self):
+        self.running = False
+        self.time = 0
+        self.stopwatch_label.config(text=f"{self.time} s")
+        self.stopwatch_button.config(text="Start Stopwatch")
 
 def remove_selected_items():
     selected_items = treeview.selection()  # get all selected items
@@ -214,7 +260,7 @@ color_scheme = light_color_scheme
 
 # Initialize tkinter root window
 root = Tk()
-root.geometry("850x600")
+root.geometry("850x650")
 root.title("Toil Tracker")
 
 # Configure root window background color
@@ -519,5 +565,7 @@ treeview.bind("<Button-3>", show_context_menu)  # Button-3 corresponds to the ri
 # Update treeview and total toil initially
 update_treeview()
 update_total_toil()
+
+stopwatch = StopWatch(root)
 
 root.mainloop()
