@@ -34,6 +34,10 @@ There is an experimental Dark Mode, but it is not currently working correctly to
 
 ## Changelog
 
+## V 1.0.5
+* There is a known issue, when toil_duration_unit is set to 'Days" then the calcluations for days do not come out right. Removing the option for days in Combobox until this feature works.
+* To achieve the same result you can use the hours Duration Unit with a Toil Duration of 8. This will simulate an 8 hour workday and still be calculated correctly.
+
 ## V 1.0.4
 * Added a stopwatch to the bottom of the application to allow users to track time taken from start to finish of tasks straight form the application.
 * Stopwatch timer is in seconds to allow users to track time easier.
