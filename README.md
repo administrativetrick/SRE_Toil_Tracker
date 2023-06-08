@@ -74,7 +74,7 @@ There is an experimental Dark Mode, but it is not currently working correctly to
 * CSV Export: A feature exists to export your tasks to a CSV file for later use.
 
 ## License
-This project is licensed under the MIT License - see the LICENSE file for details.
+This project is licensed under the Creative Commons License - see the LICENSE file for details.
 
 ## Acknowledgments
 The development of this application was aided by OpenAI's ChatGPT.
